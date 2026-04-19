@@ -68,9 +68,21 @@ function App() {
     }
   };
 
-  const handleApprove = (id: string | number) => {
-    // For now, "it stays" - we could update a status field if it exists
-    alert(`Lead ${id} approved!`);
+  const handleApprove = async (id: string | number) => {
+    try {
+      const { error } = await supabase
+        .from('join_community')
+        .update({ status: 'approved' })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Update local state
+      setLeads(prev => prev.map(l => l.id === id ? { ...l, status: 'approved' } : l));
+    } catch (err: any) {
+      console.error('Error approving lead:', err);
+      alert('Failed to approve lead. Make sure the UPDATE policy is enabled in Supabase.');
+    }
   };
 
   const handleReject = async (id: string | number) => {
@@ -214,6 +226,7 @@ function App() {
                 <LeadCard 
                   key={lead.id} 
                   lead={lead} 
+                  isApproved={lead.status === 'approved'}
                   onApprove={handleApprove}
                   onReject={handleReject}
                 />

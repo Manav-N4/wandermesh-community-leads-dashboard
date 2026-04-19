@@ -11,11 +11,12 @@ interface Lead {
 
 interface LeadCardProps {
   lead: Lead;
+  isApproved: boolean;
   onApprove: (id: string | number) => void;
   onReject: (id: string | number) => void;
 }
 
-const LeadCard: React.FC<LeadCardProps> = ({ lead, onApprove, onReject }) => {
+const LeadCard: React.FC<LeadCardProps> = ({ lead, isApproved, onApprove, onReject }) => {
   const { full_name, phone_number, instagram_handle, created_at, ...extraFields } = lead;
 
   const formatDate = (dateString?: string) => {
@@ -32,7 +33,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onApprove, onReject }) => {
 
   // Skip internal Supabase fields and the core ones we already handled
   const filteredExtraFields = Object.entries(extraFields).filter(([key, value]) => {
-    const internalFields = ['id', 'user_id', 'referral_code'];
+    const internalFields = ['id', 'user_id', 'referral_code', 'status'];
     return !internalFields.includes(key) && value !== null && value !== undefined && value !== '';
   });
 
@@ -78,20 +79,43 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onApprove, onReject }) => {
       </div>
 
       <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-        <button 
-          onClick={() => onApprove(lead.id)}
-          className="primary-button" 
-          style={{ flex: 1, background: '#10b981', fontSize: '0.8rem', padding: '0.5rem' }}
-        >
-          Approve
-        </button>
-        <button 
-          onClick={() => onReject(lead.id)}
-          className="primary-button" 
-          style={{ flex: 1, background: '#ef4444', fontSize: '0.8rem', padding: '0.5rem' }}
-        >
-          Reject
-        </button>
+        {isApproved ? (
+          <div style={{ 
+            width: '100%', 
+            padding: '0.6rem', 
+            background: '#ecfdf5', 
+            color: '#059669', 
+            borderRadius: 'var(--radius-md)', 
+            textAlign: 'center',
+            fontWeight: '700',
+            fontSize: '0.875rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            border: '1px solid #d1fae5'
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Approved
+          </div>
+        ) : (
+          <>
+            <button 
+              onClick={() => onApprove(lead.id)}
+              className="primary-button" 
+              style={{ flex: 1, background: '#10b981', fontSize: '0.8rem', padding: '0.5rem' }}
+            >
+              Approve
+            </button>
+            <button 
+              onClick={() => onReject(lead.id)}
+              className="primary-button" 
+              style={{ flex: 1, background: '#ef4444', fontSize: '0.8rem', padding: '0.5rem' }}
+            >
+              Reject
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
